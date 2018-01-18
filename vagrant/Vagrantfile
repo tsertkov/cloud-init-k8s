@@ -1,0 +1,25 @@
+synced_dir_name = "shared"
+project_dir = File.expand_path(File.dirname(__FILE__))
+synced_dir_src = File.join(project_dir, synced_dir_name)
+synced_dir_dst = "/home/vagrant/#{synced_dir_name}"
+cloud_config_iso = File.join(project_dir, "cloud-init", "nocloud.iso")
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"
+  config.vm.synced_folder synced_dir_src, synced_dir_dst
+  config.vm.network :private_network, type: "dhcp"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.name = "ubuntu-k8s-single"
+    vb.memory = "2048"
+    vb.cpus = "2"
+
+    vb.customize [
+      "storageattach", :id,
+      "--storagectl", "SCSI",
+      "--port", "1",
+      "--type", "dvddrive",
+      "--medium", cloud_config_iso
+    ]
+  end
+end

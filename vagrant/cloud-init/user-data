@@ -1,0 +1,95 @@
+#cloud-config
+apt:
+  sources:
+    kubernetes:
+      source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+      # key from https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      key: |
+        -----BEGIN PGP PUBLIC KEY BLOCK-----
+        Version: GnuPG v1
+
+        mQENBFUd6rIBCAD6mhKRHDn3UrCeLDp7U5IE7AhhrOCPpqGF7mfTemZYHf/5Jdjx
+        cOxoSFlK7zwmFr3lVqJ+tJ9L1wd1K6P7RrtaNwCiZyeNPf/Y86AJ5NJwBe0VD0xH
+        TXzPNTqRSByVYtdN94NoltXUYFAAPZYQls0x0nUD1hLMlOlC2HdTPrD1PMCnYq/N
+        uL/Vk8sWrcUt4DIS+0RDQ8tKKe5PSV0+PnmaJvdF5CKawhh0qGTklS2MXTyKFoqj
+        XgYDfY2EodI9ogT/LGr9Lm/+u4OFPvmN9VN6UG+s0DgJjWvpbmuHL/ZIRwMEn/tp
+        uneaLTO7h1dCrXC849PiJ8wSkGzBnuJQUbXnABEBAAG0QEdvb2dsZSBDbG91ZCBQ
+        YWNrYWdlcyBBdXRvbWF0aWMgU2lnbmluZyBLZXkgPGdjLXRlYW1AZ29vZ2xlLmNv
+        bT6JAT4EEwECACgFAlUd6rICGy8FCQWjmoAGCwkIBwMCBhUIAgkKCwQWAgMBAh4B
+        AheAAAoJEDdGwginMXsPcLcIAKi2yNhJMbu4zWQ2tM/rJFovazcY28MF2rDWGOnc
+        9giHXOH0/BoMBcd8rw0lgjmOosBdM2JT0HWZIxC/Gdt7NSRA0WOlJe04u82/o3OH
+        WDgTdm9MS42noSP0mvNzNALBbQnlZHU0kvt3sV1YsnrxljoIuvxKWLLwren/GVsh
+        FLPwONjw3f9Fan6GWxJyn/dkX3OSUGaduzcygw51vksBQiUZLCD2Tlxyr9NvkZYT
+        qiaWW78L6regvATsLc9L/dQUiSMQZIK6NglmHE+cuSaoK0H4ruNKeTiQUw/EGFaL
+        ecay6Qy/s3Hk7K0QLd+gl0hZ1w1VzIeXLo2BRlqnjOYFX4A=
+        =HVTm
+        -----END PGP PUBLIC KEY BLOCK-----
+packages:
+  - docker.io
+  - kubelet
+  - kubectl
+  - kubeadm
+write_files:
+  - path: /etc/systemd/system/kubernetes-pods-enable-forward.service
+    content: |
+      [Unit]
+      Description=Forward k8s pods network
+      DefaultDependencies=false
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/sbin/iptables -A FORWARD -d 10.22.0.0/16 -j ACCEPT
+      ExecStart=/sbin/iptables -A FORWARD -s 10.22.0.0/16 -j ACCEPT
+      ExecStop=
+      [Install]
+      WantedBy=sysinit.target
+  - path: /etc/kubernetes/superuser.yaml
+    content: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: superuser
+        namespace: kube-system
+      ---
+      apiVersion: rbac.authorization.k8s.io/v1beta1
+      kind: ClusterRoleBinding
+      metadata:
+        name: superuser
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      - kind: ServiceAccount
+        name: superuser
+        namespace: kube-system
+  - path: /etc/cni/net.d/10-cni.json
+    content: |
+      {
+        "cniVersion": "0.2.0",
+        "name": "kubenet",
+        "type": "bridge",
+        "bridge": "cni0",
+        "isGateway": true,
+        "ipMasq": true,
+        "ipam": {
+          "type": "host-local",
+          "subnet": "10.22.0.0/16",
+          "routes": [
+            { "dst": "0.0.0.0/0" }
+          ]
+        }
+      }
+runcmd:
+  - kubeadm init --skip-token-print --apiserver-advertise-address=$(ip -family inet addr show enp0s8 | sed -n 's/^\s\+inet \(\S\+\)\/.*/\1/p1')
+  - kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
+  - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/superuser.yaml
+  - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  - systemctl daemon-reload
+  - systemctl enable kubernetes-pods-enable-forward.service
+  - systemctl start kubernetes-pods-enable-forward.service
+  - usermod -a -G docker vagrant
+  - mkdir /home/vagrant/.kube
+  - cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+  - chown -R vagrant:vagrant /home/vagrant/.kube
+  - cp /home/vagrant/.kube/config /home/vagrant/shared/config
