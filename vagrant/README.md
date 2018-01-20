@@ -1,7 +1,7 @@
 # Vagrant managed single node Kubernetes
 
 Install dependencies:
-```
+```shell
 brew cask install virtualbox
 brew cask install vagrant
 brew install cdrtools
@@ -9,7 +9,7 @@ brew install kubectl
 ```
 
 Bring k8s up, connect to dashboard, deploy demo app:
-```
+```shell
 $ make up
 $ eval $(make kubectl-env)
 $ make dashboard
@@ -19,6 +19,6 @@ $ make hello-world-proxy
 ```
 
 Destroy vm:
-```
+```shell
 $ make destroy
 ```
