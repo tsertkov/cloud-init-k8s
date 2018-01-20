@@ -2,6 +2,8 @@
 
 Install dependencies:
 ```
+brew cask install virtualbox
+brew cask install vagrant
 brew install cdrtools
 brew install kubectl
 ```
