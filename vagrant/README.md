@@ -1,6 +1,6 @@
 # Vagrant managed single node Kubernetes
 
-Install dependencies:
+Dependencies:
 ```shell
 brew cask install virtualbox
 brew cask install vagrant
