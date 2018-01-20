@@ -1,4 +1,4 @@
-# Vagrant VM with single node Kubernetes
+# Vagrant managed single node Kubernetes
 
 Install dependencies:
 ```
