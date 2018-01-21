@@ -1,32 +1,34 @@
-CLOUD_DIR = cloud-init
+VM = centos
 PROJECT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-KUBECTL = kubectl --kubeconfig=$(PROJECT_DIR)shared/config
+VM_DIR = $(PROJECT_DIR)$(VM)
+KUBECTL = kubectl --kubeconfig=$(VM_DIR)/shared/config
+VAGRANT = VAGRANT_CWD=$(VM_DIR) vagrant
 
-nocloud.iso : $(CLOUD_DIR)/meta-data $(CLOUD_DIR)/user-data
+nocloud.iso : $(VM_DIR)/meta-data $(VM_DIR)/user-data
 	@echo "---"
 	@echo "[up] Building cloud-init iso:"
 	@echo "---"
-	@mkisofs \
+	mkisofs \
 		-joliet -rock \
 		-volid "cidata" \
-		-output $(CLOUD_DIR)/nocloud.iso $(CLOUD_DIR)/meta-data $(CLOUD_DIR)/user-data
+		-output $(VM_DIR)/nocloud.iso $(VM_DIR)/meta-data $(VM_DIR)/user-data
 
 up : nocloud.iso
 	@echo "---"
 	@echo "[up] Bringing VM up:"
 	@echo "---"
-	time vagrant up
+	$(VAGRANT) up
 
 	@echo "---"
 	@echo "[up] Watching cloud-init-outpout.log (Ctrl+C to exit):"
 	@echo "---"
-	vagrant ssh -- tail -n+0 -f /var/log/cloud-init-output.log
+	$(VAGRANT) ssh -- tail -n+0 -f /var/log/cloud-init-output.log
 
 destroy :
 	@echo "---"
 	@echo "[destroy] Destroying VM:"
 	@echo "---"
-	vagrant destroy -f
+	$(VAGRANT) destroy -f
 
 dashboard :
 	@echo "---"
@@ -57,4 +59,7 @@ hello-world-proxy:
 		| xargs -I {} $(KUBECTL) port-forward {} 8080:8080
 
 kubectl-env :
-	@echo export KUBECONFIG="$(PROJECT_DIR)shared/config"
+	@echo export KUBECONFIG="$(VM_DIR)/shared/config"
+
+vagrant-env :
+	@echo export VAGRANT_CWD="$(VM_DIR)"

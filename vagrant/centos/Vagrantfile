@@ -1,0 +1,27 @@
+synced_dir_name = "shared"
+project_dir = File.expand_path(File.dirname(__FILE__))
+synced_dir_src = File.join(project_dir, synced_dir_name)
+synced_dir_dst = "/home/centos/#{synced_dir_name}"
+cloud_config_iso = File.join(project_dir, "nocloud.iso")
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "jdeathe/centos-7-x86_64-minimal-cloud-init-en_us"
+  config.vm.synced_folder synced_dir_src, synced_dir_dst
+  config.vm.network :private_network, type: "dhcp"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.name = "centos-k8s-single"
+    vb.memory = "2048"
+    vb.cpus = "2"
+
+    vb.functional_vboxsf = false
+
+    vb.customize [
+      "storageattach", :id,
+      "--storagectl", "SATA Controller",
+      "--port", "1",
+      "--type", "dvddrive",
+      "--medium", cloud_config_iso
+    ]
+  end
+end
