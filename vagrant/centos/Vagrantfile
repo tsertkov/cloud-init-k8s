@@ -6,7 +6,6 @@ cloud_config_iso = File.join(project_dir, "nocloud.iso")
 
 Vagrant.configure("2") do |config|
   config.vm.box = "jdeathe/centos-7-x86_64-minimal-cloud-init-en_us"
-  config.vm.synced_folder synced_dir_src, synced_dir_dst
   config.vm.network :private_network, type: "dhcp"
 
   config.vm.provider :virtualbox do |vb|

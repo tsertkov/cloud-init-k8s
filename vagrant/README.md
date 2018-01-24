@@ -10,7 +10,9 @@ brew install kubectl
 
 Bring k8s up, connect to dashboard, deploy demo app, etc.:
 ```shell
+$ export VM=ubuntu
 $ make up
+$ make kubeconfig
 $ eval $(make kubectl-env)
 $ eval $(make vagrant-env)
 $ make dashboard

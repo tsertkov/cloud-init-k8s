@@ -1,7 +1,8 @@
-VM = centos
+VM ?= centos
 PROJECT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VM_DIR = $(PROJECT_DIR)$(VM)
-KUBECTL = kubectl --kubeconfig=$(VM_DIR)/shared/config
+KUBECONFIG = $(VM_DIR)/kube-config
+KUBECTL = kubectl --kubeconfig="$(KUBECONFIG)"
 VAGRANT = VAGRANT_CWD="$(VM_DIR)" vagrant
 
 nocloud.iso : $(VM_DIR)/meta-data $(VM_DIR)/user-data
@@ -23,6 +24,12 @@ up : nocloud.iso
 	@echo "[up] Watching cloud-init-outpout.log (Ctrl+C to exit):"
 	@echo "---"
 	$(VAGRANT) ssh -- tail -n+0 -f /var/log/cloud-init-output.log
+
+kubeconfig :
+	@echo "---"
+	@echo "[copy-config] Copying kubernetes config file from vm to host:"
+	@echo "---"
+	$(VAGRANT) ssh -- sudo cat /etc/kubernetes/admin.conf > $(KUBECONFIG)
 
 destroy :
 	@echo "---"
@@ -59,7 +66,7 @@ hello-world-proxy:
 		| xargs -I {} $(KUBECTL) port-forward {} 8080:8080
 
 kubectl-env :
-	@echo export KUBECONFIG="$(VM_DIR)/shared/config"
+	@echo export KUBECONFIG="$(KUBECONFIG)"
 
 vagrant-env :
 	@echo export VAGRANT_CWD="$(VM_DIR)"

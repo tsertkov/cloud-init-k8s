@@ -1,3 +1,4 @@
 .vagrant
 *-console.log
+kube-config
 nocloud.iso

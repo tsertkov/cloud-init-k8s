@@ -88,8 +88,4 @@ runcmd:
   - systemctl daemon-reload
   - systemctl enable kubernetes-pods-enable-forward.service
   - systemctl start kubernetes-pods-enable-forward.service
-  - usermod -a -G docker vagrant
-  - mkdir /home/vagrant/.kube
-  - cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-  - chown -R vagrant:vagrant /home/vagrant/.kube
-  - cp /home/vagrant/.kube/config /home/vagrant/shared/config
+

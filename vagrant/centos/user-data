@@ -62,8 +62,4 @@ runcmd:
   - kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
   - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/superuser.yaml
   - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
-  - usermod -a -G docker centos
-  - mkdir /home/centos/.kube
-  - cp /etc/kubernetes/admin.conf /home/centos/.kube/config
-  - chown -R centos:centos /home/centos/.kube
-  - cp /home/centos/.kube/config /home/centos/shared/config
+
