@@ -25,6 +25,12 @@ up : nocloud.iso
 	@echo "---"
 	$(VAGRANT) ssh -- tail -n+0 -f /var/log/cloud-init-output.log
 
+stop :
+	@echo "---"
+	@echo "[stop] Shutting down VM:"
+	@echo "---"
+	$(VAGRANT) halt
+
 kubeconfig :
 	@echo "---"
 	@echo "[copy-config] Copying kubernetes config file from vm to host:"
