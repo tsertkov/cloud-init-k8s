@@ -2,10 +2,10 @@
 
 Dependencies:
 ```shell
-brew cask install virtualbox
-brew cask install vagrant
-brew install cdrtools
-brew install kubectl
+$ brew cask install virtualbox
+$ brew cask install vagrant
+$ brew install cdrtools
+$ brew install kubectl
 ```
 
 Bring k8s up, connect to dashboard, deploy demo app, etc.:
