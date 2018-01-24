@@ -62,5 +62,5 @@ runcmd:
   - kubeadm init --skip-token-print --apiserver-advertise-address=$(ip -family inet addr show eth1 | sed -n 's/^\s\+inet \(\S\+\)\/.*/\1/p1')
   - kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
   - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/superuser.yaml
-  - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 
