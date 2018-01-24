@@ -81,6 +81,7 @@ write_files:
         }
       }
 runcmd:
+  - set -x
   - kubeadm init --skip-token-print --apiserver-advertise-address=$(ip -family inet addr show enp0s8 | sed -n 's/^\s\+inet \(\S\+\)\/.*/\1/p1')
   - kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
   - kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/superuser.yaml

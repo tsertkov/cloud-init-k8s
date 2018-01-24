@@ -54,6 +54,7 @@ write_files:
         }
       }
 runcmd:
+  - set -x
   - swapoff -a
   - sed -i '/\sswap\s/d' /etc/fstab
   - systemctl enable --now docker
