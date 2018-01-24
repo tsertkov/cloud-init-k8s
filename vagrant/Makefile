@@ -2,7 +2,7 @@ VM = centos
 PROJECT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VM_DIR = $(PROJECT_DIR)$(VM)
 KUBECTL = kubectl --kubeconfig=$(VM_DIR)/shared/config
-VAGRANT = VAGRANT_CWD=$(VM_DIR) vagrant
+VAGRANT = VAGRANT_CWD="$(VM_DIR)" vagrant
 
 nocloud.iso : $(VM_DIR)/meta-data $(VM_DIR)/user-data
 	@echo "---"
@@ -11,7 +11,7 @@ nocloud.iso : $(VM_DIR)/meta-data $(VM_DIR)/user-data
 	mkisofs \
 		-joliet -rock \
 		-volid "cidata" \
-		-output $(VM_DIR)/nocloud.iso $(VM_DIR)/meta-data $(VM_DIR)/user-data
+		-output "$(VM_DIR)/nocloud.iso" "$(VM_DIR)/meta-data" "$(VM_DIR)/user-data"
 
 up : nocloud.iso
 	@echo "---"
